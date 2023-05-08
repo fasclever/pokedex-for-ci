@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const express = require('express')
 const app = express()
 const { version } = require('./package.json')

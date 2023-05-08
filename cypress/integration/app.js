@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* global cy */
 
 describe('Pokedex', function() {

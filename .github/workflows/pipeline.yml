@@ -67,13 +67,7 @@ jobs:
           path: dist
        - name: Test
          run: npm run test
-       - name: Test e2e
-         if: false
-         uses: cypress-io/github-action@v2
-         with:
-          command: npm run test:e2e
-          start: npm run start-test
-          wait-on: http://localhost:5000
+       
 
   e2e-test:
      needs: [lint,build]

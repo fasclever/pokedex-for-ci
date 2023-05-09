@@ -10,13 +10,18 @@ on:
       
 
 jobs:
-  deploy:
+
+  avoid_reduncy:
     runs-on: self-hosted
     steps:
       - name: Cancel previous builds
         uses: styfle/cancel-workflow-action@0.9.1
         with:
-          access_token: ${{ github.token }}
+          access_token: ${{ github.token }} 
+  
+  lint:
+    runs-on: self-hosted
+    steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -27,16 +32,81 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run eslint
+
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install dependencies
+        run: npm ci
       - name: Build
         run: npm run build
-      - name: Test
-        run: npm run test
-      - name: Test e2e
-        if: false
-        uses: cypress-io/github-action@v2
+      - uses: actions/upload-artifact@v2
         with:
+          name: dist
+          path: dist
+
+  test:
+     needs: [lint,build]
+     runs-on: self-hosted
+     steps:
+       - uses: actions/checkout@v2
+         with:
+          fetch-depth: 0
+       - uses: actions/setup-node@v2
+         with:
+          node-version: '14'
+       - uses: actions/download-artifact@v2
+         with:
+          name: dist
+          path: dist
+       - name: Test
+         run: npm run test
+       - name: Test e2e
+         if: false
+         uses: cypress-io/github-action@v2
+         with:
           command: npm run test:e2e
           start: npm run start-test
           wait-on: http://localhost:5000
 
+  e2e-test:
+     needs: [lint,build]
+     runs-on: self-hosted
+     steps:
+       - uses: actions/checkout@v2
+         with:
+          fetch-depth: 0
+       - uses: actions/setup-node@v2
+         with:
+          node-version: '14'
+       - uses: actions/download-artifact@v2
+         with:
+          name: dist
+          path: dist
+       - name: Test e2e
+         if: false
+         uses: cypress-io/github-action@v2
+         with:
+          command: npm run test:e2e
+          start: npm run start-test
+          wait-on: http://localhost:5000
+
+
+  deploy:
+    needs: [test]
+    runs-on: self-hosted
+    steps:
+      - name: deploy in server
+        run: echo "deploy in a server"
+      
+      
+        
+      
+     
   

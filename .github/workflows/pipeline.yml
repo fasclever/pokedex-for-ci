@@ -4,11 +4,19 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches: [main]
+    types: [opened,synchronize]
+      
 
 jobs:
   deploy:
     runs-on: self-hosted
     steps:
+      - name: Cancel previous builds
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
